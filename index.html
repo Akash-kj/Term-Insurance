@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Term Insurance Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f4f8;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #0057d9;
+    }
+
+    .calculator {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    label {
+      margin-top: 20px;
+      display: block;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      margin-top: 30px;
+      background-color: #0057d9;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .result {
+      margin-top: 30px;
+      background: #ecf5ff;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Term Insurance Calculator</h1>
+
+  <div class="calculator">
+    <label for="age">Current Age</label>
+    <input type="number" id="age" min="25" max="55">
+
+    <label for="income">Monthly Income (₹)</label>
+    <input type="number" id="income" min="0">
+
+    <label for="smoker">Are you a smoker?</label>
+    <select id="smoker">
+      <option value="no">No</option>
+      <option value="yes">Yes</option>
+    </select>
+
+    <label for="coverAge">Life Cover Till Age</label>
+    <select id="coverAge">
+      <option value="70">70</option>
+      <option value="80">80</option>
+      <option value="85" selected>85</option>
+    </select>
+
+    <button onclick="calculate()">Calculate</button>
+
+    <div id="output" class="result" style="display:none;"></div>
+  </div>
+
+  <script>
+    const dataByCoverAge = {
+      "70": {
+        "25-29": { "1.5": { yes: [31606, 38204], no: [18592, 22410] }, "2.5": { yes: [39148, 53392], no: [23147, 31526] } },
+        "30-34": { "1.5": { yes: [38726, 47510], no: [22780, 27801] }, "2.5": { yes: [48376, 65862], no: [28457, 37851] } },
+        "35-39": { "1.5": { yes: [49572, 61302], no: [29160, 35601] }, "2.5": { yes: [62142, 84537], no: [36554, 49729] } },
+        "40-44": { "1.5": { yes: [66592, 78913], no: [39172, 45901] }, "2.5": { yes: [79892, 114591], no: [46996, 67589] } },
+        "45-49": { "1.5": { yes: [107907, 122045], no: [62999, 74950] }, "2.5": { yes: [133718, 193091], no: [78340, 113812] } },
+        "50-54": { "1.5": { yes: [148121, 184031], no: [87131, 107935] }, "2.5": { yes: [185319, 271052], no: [108993, 159447] } },
+        "55": { "1.5": { yes: [327564, 459242], no: [192686, 271093] }, "2.5": { yes: [468193, 666681], no: [275843, 391122] } }
+      },
+      "80": {
+        "25-29": { "1.5": { yes: [41096, 51094], no: [24173, 30581] }, "2.5": { yes: [52084, 75514], no: [30616, 44564] } },
+        "30-34": { "1.5": { yes: [51468, 64531], no: [30843, 38143] }, "2.5": { yes: [65433, 95567], no: [38490, 56432] } },
+        "35-39": { "1.5": { yes: [67733, 85410], no: [39844, 49810] }, "2.5": { yes: [85743, 126499], no: [50468, 74412] } },
+        "40-44": { "1.5": { yes: [93749, 121451], no: [54989, 72252] }, "2.5": { yes: [122865, 177810], no: [72252, 100432] } },
+        "45-49": { "1.5": { yes: [175512, 290743], no: [103243, 121734] }, "2.5": { yes: [213606, 310025], no: [126561, 182351] } },
+        "50-54": { "1.5": { yes: [253945, 301935], no: [140897, 173213] }, "2.5": { yes: [301934, 440654], no: [177109, 269851] } },
+        "55": { "1.5": { yes: [646019, 790541], no: [380008, 467321] }, "2.5": { yes: [805417, 1208651], no: [473091, 710943] } }
+      },
+      "85": {
+        "25-29": { "1.5": { yes: [48369, 60312], no: [28456, 35431] }, "2.5": { yes: [61341, 90324], no: [36197, 53247] } },
+        "30-34": { "1.5": { yes: [61032, 77451], no: [36061, 45392] }, "2.5": { yes: [78362, 115456], no: [46095, 67910] } },
+        "35-39": { "1.5": { yes: [80657, 102345], no: [47670, 60943] }, "2.5": { yes: [103985, 153245], no: [61742, 90541] } },
+        "40-44": { "1.5": { yes: [112769, 148756], no: [66366, 87341] }, "2.5": { yes: [150890, 218542], no: [88700, 128437] } },
+        "45-49": { "1.5": { yes: [203520, 245745], no: [119718, 143451] }, "2.5": { yes: [249840, 362419], no: [146758, 213546] } },
+        "50-54": { "1.5": { yes: [285678, 357432], no: [167592, 210971] }, "2.5": { yes: [361392, 543614], no: [212519, 319853] } },
+        "55": { "1.5": { yes: [803245, 105453], no: [472392, 548201] }, "2.5": { yes: [1064357, 1674230], no: [598227, 946422] } }
+      }
+    };
+
+    function getAgeGroup(age) {
+      if (age >= 25 && age <= 29) return "25-29";
+      if (age >= 30 && age <= 34) return "30-34";
+      if (age >= 35 && age <= 39) return "35-39";
+      if (age >= 40 && age <= 44) return "40-44";
+      if (age >= 45 && age <= 49) return "45-49";
+      if (age >= 50 && age <= 54) return "50-54";
+      if (age == 55) return "55";
+      return null;
+    }
+
+    function calculate() {
+      const age = parseInt(document.getElementById('age').value);
+      const income = parseInt(document.getElementById('income').value);
+      const smoker = document.getElementById('smoker').value;
+      const coverAge = document.getElementById('coverAge').value;
+
+      const ageGroup = getAgeGroup(age);
+      if (!ageGroup) {
+        alert("Please enter a valid age between 25 and 55.");
+        return;
+      }
+
+      const lifeCover = income * 150;
+      const coverBracket = lifeCover <= 20000000 ? "1.5" : "2.5";
+      const smokerStatus = smoker === "yes" ? "yes" : "no";
+
+      const data = dataByCoverAge[coverAge];
+      const premiumRange = data?.[ageGroup]?.[coverBracket]?.[smokerStatus];
+
+      if (!premiumRange) {
+        document.getElementById("output").innerHTML = "No data available for your input.";
+        return;
+      }
+
+      const output = `
+        <strong>Expected Life Cover:</strong> ₹${(lifeCover / 10000000).toFixed(2)} Crores<br>
+        <strong>Annual Premium (tentative):</strong> ₹${premiumRange[0].toLocaleString()} - ₹${premiumRange[1].toLocaleString()}<br>
+        <strong>Paying Term:</strong> ${60 - age} years (till age 60)<br><br>
+        <em>* Premiums are tentative and may vary based on your health and insurer underwriting.</em>
+      `;
+
+      document.getElementById("output").innerHTML = output;
+      document.getElementById("output").style.display = "block";
+    }
+  </script>
+</body>
+</html>
