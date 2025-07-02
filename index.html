@@ -1,171 +1,423 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Term Insurance Calculator</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f2f4f8;
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    h1 {
-      color: #0057d9;
-    }
-
-    .calculator {
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 600px;
-    }
-
-    label {
-      margin-top: 20px;
-      display: block;
-      font-weight: 600;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    button {
-      margin-top: 30px;
-      background-color: #0057d9;
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .result {
-      margin-top: 30px;
-      background: #ecf5ff;
-      padding: 20px;
-      border-radius: 10px;
-      font-size: 15px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Term Insurance Premium Calculator</title>
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f8; margin: 0; padding: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; color: #333; }
+  .container { background: white; margin: 40px 20px; padding: 30px 40px; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); max-width: 480px; width: 100%; }
+  h1 { text-align: center; color: #0077cc; margin-bottom: 30px; }
+  label { display: block; margin-top: 15px; font-weight: 600; }
+  input[type="number"], select { width: 100%; padding: 10px 12px; margin-top: 6px; border: 1.8px solid #ccc; border-radius: 6px; font-size: 16px; transition: border-color 0.3s; }
+  input[type="number"]:focus, select:focus { border-color: #0077cc; outline: none; }
+  .tabs { margin-top: 20px; display: flex; justify-content: space-between; }
+  .tab { flex: 1; text-align: center; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; font-weight: 600; color: #555; transition: all 0.3s ease; user-select: none; }
+  .tab.active { border-color: #0077cc; color: #0077cc; }
+  .smoker-toggle { margin-top: 20px; display: flex; align-items: center; gap: 10px; }
+  .smoker-toggle input { width: auto; }
+  button { margin-top: 30px; width: 100%; background-color: #0077cc; color: white; font-size: 18px; padding: 12px 0; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; transition: background-color 0.3s; }
+  button:hover { background-color: #005fa3; }
+  .output { margin-top: 30px; background: #e7f0fc; padding: 20px; border-radius: 8px; color: #004a99; font-weight: 600; line-height: 1.5; }
+  .note { font-size: 14px; color: #666; margin-top: 15px; font-style: italic; }
+</style>
 </head>
 <body>
+  <div class="container">
+    <h1>Term Insurance Calculator</h1>
+    <label for="currentAge">Current Age</label>
+    <input type="number" id="currentAge" min="25" max="55" value="30" />
 
-  <h1>Term Insurance Calculator</h1>
+    <label for="monthlyIncome">Monthly Income (₹)</label>
+    <input type="number" id="monthlyIncome" min="0" value="50000" />
 
-  <div class="calculator">
-    <label for="age">Current Age</label>
-    <input type="number" id="age" min="25" max="55">
+    <div class="tabs">
+      <div class="tab active" data-age="70">Life Cover up to 70 years</div>
+      <div class="tab" data-age="80">Life Cover up to 80 years</div>
+      <div class="tab" data-age="85">Life Cover up to 85 years</div>
+    </div>
 
-    <label for="income">Monthly Income (₹)</label>
-    <input type="number" id="income" min="0">
+    <div class="smoker-toggle">
+      <label for="smoker">Smoker</label>
+      <input type="checkbox" id="smoker" />
+    </div>
 
-    <label for="smoker">Are you a smoker?</label>
-    <select id="smoker">
-      <option value="no">No</option>
-      <option value="yes">Yes</option>
-    </select>
+    <button id="calculateBtn">Calculate</button>
 
-    <label for="coverAge">Life Cover Till Age</label>
-    <select id="coverAge">
-      <option value="70">70</option>
-      <option value="80">80</option>
-      <option value="85" selected>85</option>
-    </select>
-
-    <button onclick="calculate()">Calculate</button>
-
-    <div id="output" class="result" style="display:none;"></div>
+    <div class="output" id="output" style="display:none;"></div>
+    <div class="note" id="note" style="display:none;">
+      Premiums are tentative and will be disclosed based on your health conditions and the insurance company.<br />
+      Paying term is calculated till 60 years of age.
+    </div>
   </div>
 
-  <script>
-    const dataByCoverAge = {
-      "70": {
-        "25-29": { "1.5": { yes: [31606, 38204], no: [18592, 22410] }, "2.5": { yes: [39148, 53392], no: [23147, 31526] } },
-        "30-34": { "1.5": { yes: [38726, 47510], no: [22780, 27801] }, "2.5": { yes: [48376, 65862], no: [28457, 37851] } },
-        "35-39": { "1.5": { yes: [49572, 61302], no: [29160, 35601] }, "2.5": { yes: [62142, 84537], no: [36554, 49729] } },
-        "40-44": { "1.5": { yes: [66592, 78913], no: [39172, 45901] }, "2.5": { yes: [79892, 114591], no: [46996, 67589] } },
-        "45-49": { "1.5": { yes: [107907, 122045], no: [62999, 74950] }, "2.5": { yes: [133718, 193091], no: [78340, 113812] } },
-        "50-54": { "1.5": { yes: [148121, 184031], no: [87131, 107935] }, "2.5": { yes: [185319, 271052], no: [108993, 159447] } },
-        "55": { "1.5": { yes: [327564, 459242], no: [192686, 271093] }, "2.5": { yes: [468193, 666681], no: [275843, 391122] } }
-      },
-      "80": {
-        "25-29": { "1.5": { yes: [41096, 51094], no: [24173, 30581] }, "2.5": { yes: [52084, 75514], no: [30616, 44564] } },
-        "30-34": { "1.5": { yes: [51468, 64531], no: [30843, 38143] }, "2.5": { yes: [65433, 95567], no: [38490, 56432] } },
-        "35-39": { "1.5": { yes: [67733, 85410], no: [39844, 49810] }, "2.5": { yes: [85743, 126499], no: [50468, 74412] } },
-        "40-44": { "1.5": { yes: [93749, 121451], no: [54989, 72252] }, "2.5": { yes: [122865, 177810], no: [72252, 100432] } },
-        "45-49": { "1.5": { yes: [175512, 290743], no: [103243, 121734] }, "2.5": { yes: [213606, 310025], no: [126561, 182351] } },
-        "50-54": { "1.5": { yes: [253945, 301935], no: [140897, 173213] }, "2.5": { yes: [301934, 440654], no: [177109, 269851] } },
-        "55": { "1.5": { yes: [646019, 790541], no: [380008, 467321] }, "2.5": { yes: [805417, 1208651], no: [473091, 710943] } }
-      },
-      "85": {
-        "25-29": { "1.5": { yes: [48369, 60312], no: [28456, 35431] }, "2.5": { yes: [61341, 90324], no: [36197, 53247] } },
-        "30-34": { "1.5": { yes: [61032, 77451], no: [36061, 45392] }, "2.5": { yes: [78362, 115456], no: [46095, 67910] } },
-        "35-39": { "1.5": { yes: [80657, 102345], no: [47670, 60943] }, "2.5": { yes: [103985, 153245], no: [61742, 90541] } },
-        "40-44": { "1.5": { yes: [112769, 148756], no: [66366, 87341] }, "2.5": { yes: [150890, 218542], no: [88700, 128437] } },
-        "45-49": { "1.5": { yes: [203520, 245745], no: [119718, 143451] }, "2.5": { yes: [249840, 362419], no: [146758, 213546] } },
-        "50-54": { "1.5": { yes: [285678, 357432], no: [167592, 210971] }, "2.5": { yes: [361392, 543614], no: [212519, 319853] } },
-        "55": { "1.5": { yes: [803245, 105453], no: [472392, 548201] }, "2.5": { yes: [1064357, 1674230], no: [598227, 946422] } }
-      }
-    };
+<script>
+  // PremiumTables for 70, 80, and 85 years (first value in each range)
+  const premiumTables = {
+  70: [
+    { age: 25, coverRange: "1-1.49 Cr", smoker: 22104, nonSmoker: 13003 },
+    { age: 26, coverRange: "1-1.49 Cr", smoker: 23863, nonSmoker: 14044 },
+    { age: 27, coverRange: "1-1.49 Cr", smoker: 25622, nonSmoker: 15085 },
+    { age: 28, coverRange: "1-1.49 Cr", smoker: 27382, nonSmoker: 16126 },
+    { age: 29, coverRange: "1-1.49 Cr", smoker: 29141, nonSmoker: 17167 },
+    { age: 30, coverRange: "1-1.49 Cr", smoker: 25952, nonSmoker: 15462 },
+    { age: 31, coverRange: "1-1.49 Cr", smoker: 28130, nonSmoker: 16588 },
+    { age: 32, coverRange: "1-1.49 Cr", smoker: 30308, nonSmoker: 17714 },
+    { age: 33, coverRange: "1-1.49 Cr", smoker: 32486, nonSmoker: 18841 },
+    { age: 34, coverRange: "1-1.49 Cr", smoker: 34664, nonSmoker: 19967 },
+    { age: 35, coverRange: "1-1.49 Cr", smoker: 30981, nonSmoker: 19673 },
+    { age: 36, coverRange: "1-1.49 Cr", smoker: 34565, nonSmoker: 21526 },
+    { age: 37, coverRange: "1-1.49 Cr", smoker: 38149, nonSmoker: 23380 },
+    { age: 38, coverRange: "1-1.49 Cr", smoker: 41733, nonSmoker: 25233 },
+    { age: 39, coverRange: "1-1.49 Cr", smoker: 45317, nonSmoker: 27087 },
+    { age: 40, coverRange: "1-1.49 Cr", smoker: 44982, nonSmoker: 26172 },
+    { age: 41, coverRange: "1-1.49 Cr", smoker: 49007, nonSmoker: 29918 },
+    { age: 42, coverRange: "1-1.49 Cr", smoker: 53032, nonSmoker: 33664 },
+    { age: 43, coverRange: "1-1.49 Cr", smoker: 57058, nonSmoker: 37410 },
+    { age: 44, coverRange: "1-1.49 Cr", smoker: 61083, nonSmoker: 41156 },
+    { age: 45, coverRange: "1-1.49 Cr", smoker: 83313, nonSmoker: 49008 },
+    { age: 46, coverRange: "1-1.49 Cr", smoker: 88029, nonSmoker: 51718 },
+    { age: 47, coverRange: "1-1.49 Cr", smoker: 92745, nonSmoker: 54429 },
+    { age: 48, coverRange: "1-1.49 Cr", smoker: 97461, nonSmoker: 57139 },
+    { age: 49, coverRange: "1-1.49 Cr", smoker: 102177, nonSmoker: 59850 },
+    { age: 50, coverRange: "1-1.49 Cr", smoker: 113740, nonSmoker: 66906 },
+    { age: 51, coverRange: "1-1.49 Cr", smoker: 120172, nonSmoker: 70602 },
+    { age: 52, coverRange: "1-1.49 Cr", smoker: 126605, nonSmoker: 74299 },
+    { age: 53, coverRange: "1-1.49 Cr", smoker: 133037, nonSmoker: 77996 },
+    { age: 54, coverRange: "1-1.49 Cr", smoker: 139470, nonSmoker: 81693 },
+    { age: 55, coverRange: "1-1.49 Cr", smoker: 245167, nonSmoker: 144216 },
 
-    function getAgeGroup(age) {
-      if (age >= 25 && age <= 29) return "25-29";
-      if (age >= 30 && age <= 34) return "30-34";
-      if (age >= 35 && age <= 39) return "35-39";
-      if (age >= 40 && age <= 44) return "40-44";
-      if (age >= 45 && age <= 49) return "45-49";
-      if (age >= 50 && age <= 54) return "50-54";
-      if (age == 55) return "55";
-      return null;
+    { age: 25, coverRange: "1.5-2 Cr", smoker: 31606, nonSmoker: 18592 },
+    { age: 26, coverRange: "1.5-2 Cr", smoker: 32925, nonSmoker: 19355 },
+    { age: 27, coverRange: "1.5-2 Cr", smoker: 34245, nonSmoker: 20119 },
+    { age: 28, coverRange: "1.5-2 Cr", smoker: 35564, nonSmoker: 20883 },
+    { age: 29, coverRange: "1.5-2 Cr", smoker: 36884, nonSmoker: 21646 },
+    { age: 30, coverRange: "1.5-2 Cr", smoker: 38726, nonSmoker: 22780 },
+    { age: 31, coverRange: "1.5-2 Cr", smoker: 40482, nonSmoker: 23784 },
+    { age: 32, coverRange: "1.5-2 Cr", smoker: 42239, nonSmoker: 24788 },
+    { age: 33, coverRange: "1.5-2 Cr", smoker: 43996, nonSmoker: 25792 },
+    { age: 34, coverRange: "1.5-2 Cr", smoker: 45753, nonSmoker: 26796 },
+    { age: 35, coverRange: "1.5-2 Cr", smoker: 49572, nonSmoker: 29160 },
+    { age: 36, coverRange: "1.5-2 Cr", smoker: 51918, nonSmoker: 30448 },
+    { age: 37, coverRange: "1.5-2 Cr", smoker: 54264, nonSmoker: 31736 },
+    { age: 38, coverRange: "1.5-2 Cr", smoker: 56610, nonSmoker: 33024 },
+    { age: 39, coverRange: "1.5-2 Cr", smoker: 58956, nonSmoker: 34312 },
+    { age: 40, coverRange: "1.5-2 Cr", smoker: 66592, nonSmoker: 39172 },
+    { age: 41, coverRange: "1.5-2 Cr", smoker: 69056, nonSmoker: 40517 },
+    { age: 42, coverRange: "1.5-2 Cr", smoker: 71520, nonSmoker: 41863 },
+    { age: 43, coverRange: "1.5-2 Cr", smoker: 73984, nonSmoker: 43209 },
+    { age: 44, coverRange: "1.5-2 Cr", smoker: 76448, nonSmoker: 44555 },
+    { age: 45, coverRange: "1.5-2 Cr", smoker: 107907, nonSmoker: 62999 },
+    { age: 46, coverRange: "1.5-2 Cr", smoker: 110734, nonSmoker: 65389 },
+    { age: 47, coverRange: "1.5-2 Cr", smoker: 113562, nonSmoker: 67779 },
+    { age: 48, coverRange: "1.5-2 Cr", smoker: 116389, nonSmoker: 70169 },
+    { age: 49, coverRange: "1.5-2 Cr", smoker: 119217, nonSmoker: 72559 },
+    { age: 50, coverRange: "1.5-2 Cr", smoker: 148121, nonSmoker: 87131 },
+    { age: 51, coverRange: "1.5-2 Cr", smoker: 155303, nonSmoker: 91291 },
+    { age: 52, coverRange: "1.5-2 Cr", smoker: 162485, nonSmoker: 95452 },
+    { age: 53, coverRange: "1.5-2 Cr", smoker: 169667, nonSmoker: 99613 },
+    { age: 54, coverRange: "1.5-2 Cr", smoker: 176849, nonSmoker: 103774 },
+    { age: 55, coverRange: "1.5-2 Cr", smoker: 327564, nonSmoker: 192686 },
+
+    { age: 25, coverRange: "2-3 Cr", smoker: 39148, nonSmoker: 23147 },
+    { age: 26, coverRange: "2-3 Cr", smoker: 41996, nonSmoker: 24822 },
+    { age: 27, coverRange: "2-3 Cr", smoker: 44845, nonSmoker: 26498 },
+    { age: 28, coverRange: "2-3 Cr", smoker: 47694, nonSmoker: 28174 },
+    { age: 29, coverRange: "2-3 Cr", smoker: 50543, nonSmoker: 29850 },
+    { age: 30, coverRange: "2-3 Cr", smoker: 48376, nonSmoker: 28457 },
+    { age: 31, coverRange: "2-3 Cr", smoker: 51873, nonSmoker: 30335 },
+    { age: 32, coverRange: "2-3 Cr", smoker: 55370, nonSmoker: 32214 },
+    { age: 33, coverRange: "2-3 Cr", smoker: 58867, nonSmoker: 34093 },
+    { age: 34, coverRange: "2-3 Cr", smoker: 62364, nonSmoker: 35972 },
+    { age: 35, coverRange: "2-3 Cr", smoker: 62142, nonSmoker: 36554 },
+    { age: 36, coverRange: "2-3 Cr", smoker: 66621, nonSmoker: 39189 },
+    { age: 37, coverRange: "2-3 Cr", smoker: 71100, nonSmoker: 41824 },
+    { age: 38, coverRange: "2-3 Cr", smoker: 75579, nonSmoker: 44459 },
+    { age: 39, coverRange: "2-3 Cr", smoker: 80058, nonSmoker: 47094 },
+    { age: 40, coverRange: "2-3 Cr", smoker: 79892, nonSmoker: 46996 },
+    { age: 41, coverRange: "2-3 Cr", smoker: 86831, nonSmoker: 51114 },
+    { age: 42, coverRange: "2-3 Cr", smoker: 93771, nonSmoker: 55233 },
+    { age: 43, coverRange: "2-3 Cr", smoker: 100711, nonSmoker: 59351 },
+    { age: 44, coverRange: "2-3 Cr", smoker: 107651, nonSmoker: 63470 },
+    { age: 45, coverRange: "2-3 Cr", smoker: 133718, nonSmoker: 78340 },
+    { age: 46, coverRange: "2-3 Cr", smoker: 145592, nonSmoker: 85434 },
+    { age: 47, coverRange: "2-3 Cr", smoker: 157467, nonSmoker: 92528 },
+    { age: 48, coverRange: "2-3 Cr", smoker: 169341, nonSmoker: 99623 },
+    { age: 49, coverRange: "2-3 Cr", smoker: 181216, nonSmoker: 106717 },
+    { age: 50, coverRange: "2-3 Cr", smoker: 185319, nonSmoker: 108993 },
+    { age: 51, coverRange: "2-3 Cr", smoker: 202465, nonSmoker: 119083 },
+    { age: 52, coverRange: "2-3 Cr", smoker: 219612, nonSmoker: 129174 },
+    { age: 53, coverRange: "2-3 Cr", smoker: 236758, nonSmoker: 139265 },
+    { age: 54, coverRange: "2-3 Cr", smoker: 253905, nonSmoker: 149356 },
+    { age: 55, coverRange: "2-3 Cr", smoker: 468193, nonSmoker: 275843 }
+  ],
+  80: [
+    { age: 25, coverRange: "1-1.49 Cr", smoker: 29840, nonSmoker: 17431 },
+    { age: 26, coverRange: "1-1.49 Cr", smoker: 32612, nonSmoker: 18859 },
+    { age: 27, coverRange: "1-1.49 Cr", smoker: 35384, nonSmoker: 20288 },
+    { age: 28, coverRange: "1-1.49 Cr", smoker: 38156, nonSmoker: 21716 },
+    { age: 29, coverRange: "1-1.49 Cr", smoker: 40931, nonSmoker: 23145 },
+    { age: 30, coverRange: "1-1.49 Cr", smoker: 42902, nonSmoker: 25503 },
+    { age: 31, coverRange: "1-1.49 Cr", smoker: 44245, nonSmoker: 26659 },
+    { age: 32, coverRange: "1-1.49 Cr", smoker: 46744, nonSmoker: 27915 },
+    { age: 33, coverRange: "1-1.49 Cr", smoker: 47339, nonSmoker: 29230 },
+    { age: 34, coverRange: "1-1.49 Cr", smoker: 50934, nonSmoker: 30127 },
+    { age: 35, coverRange: "1-1.49 Cr", smoker: 54530, nonSmoker: 32300 },
+    { age: 36, coverRange: "1-1.49 Cr", smoker: 55508, nonSmoker: 33545 },
+    { age: 37, coverRange: "1-1.49 Cr", smoker: 56516, nonSmoker: 34667 },
+    { age: 38, coverRange: "1-1.49 Cr", smoker: 61124, nonSmoker: 36988 },
+    { age: 39, coverRange: "1-1.49 Cr", smoker: 65732, nonSmoker: 38710 },
+    { age: 40, coverRange: "1-1.49 Cr", smoker: 70450, nonSmoker: 42130 },
+    { age: 41, coverRange: "1-1.49 Cr", smoker: 74531, nonSmoker: 43882 },
+    { age: 42, coverRange: "1-1.49 Cr", smoker: 77751, nonSmoker: 45835 },
+    { age: 43, coverRange: "1-1.49 Cr", smoker: 84387, nonSmoker: 49788 },
+    { age: 44, coverRange: "1-1.49 Cr", smoker: 91023, nonSmoker: 53741 },
+    { age: 45, coverRange: "1-1.49 Cr", smoker: 127798, nonSmoker: 74828 },
+    { age: 46, coverRange: "1-1.49 Cr", smoker: 137684, nonSmoker: 81698 },
+    { age: 47, coverRange: "1-1.49 Cr", smoker: 147571, nonSmoker: 88569 },
+    { age: 48, coverRange: "1-1.49 Cr", smoker: 157458, nonSmoker: 95439 },
+    { age: 49, coverRange: "1-1.49 Cr", smoker: 167345, nonSmoker: 102310 },
+    { age: 50, coverRange: "1-1.49 Cr", smoker: 177345, nonSmoker: 114571 },
+    { age: 51, coverRange: "1-1.49 Cr", smoker: 191556, nonSmoker: 113188 },
+    { age: 52, coverRange: "1-1.49 Cr", smoker: 205767, nonSmoker: 121806 },
+    { age: 53, coverRange: "1-1.49 Cr", smoker: 219978, nonSmoker: 130424 },
+    { age: 54, coverRange: "1-1.49 Cr", smoker: 234189, nonSmoker: 139042 },
+    { age: 55, coverRange: "1-1.49 Cr", smoker: 488536, nonSmoker: 287709 },
+
+    { age: 25, coverRange: "1.5-2 Cr", smoker: 41096, nonSmoker: 24173 },
+    { age: 26, coverRange: "1.5-2 Cr", smoker: 43595, nonSmoker: 25775 },
+    { age: 27, coverRange: "1.5-2 Cr", smoker: 46094, nonSmoker: 27377 },
+    { age: 28, coverRange: "1.5-2 Cr", smoker: 48594, nonSmoker: 28979 },
+    { age: 29, coverRange: "1.5-2 Cr", smoker: 51094, nonSmoker: 30581 },
+    { age: 30, coverRange: "1.5-2 Cr", smoker: 54168, nonSmoker: 31190 },
+    { age: 31, coverRange: "1.5-2 Cr", smoker: 55933, nonSmoker: 32668 },
+    { age: 32, coverRange: "1.5-2 Cr", smoker: 57999, nonSmoker: 34493 },
+    { age: 33, coverRange: "1.5-2 Cr", smoker: 61265, nonSmoker: 36318 },
+    { age: 34, coverRange: "1.5-2 Cr", smoker: 64531, nonSmoker: 38143 },
+    { age: 35, coverRange: "1.5-2 Cr", smoker: 67733, nonSmoker: 39844 },
+    { age: 36, coverRange: "1.5-2 Cr", smoker: 72152, nonSmoker: 42335 },
+    { age: 37, coverRange: "1.5-2 Cr", smoker: 76571, nonSmoker: 44827 },
+    { age: 38, coverRange: "1.5-2 Cr", smoker: 80990, nonSmoker: 47318 },
+    { age: 39, coverRange: "1.5-2 Cr", smoker: 85410, nonSmoker: 49810 },
+    { age: 40, coverRange: "1.5-2 Cr", smoker: 93749, nonSmoker: 54989 },
+    { age: 41, coverRange: "1.5-2 Cr", smoker: 100674, nonSmoker: 59304 },
+    { age: 42, coverRange: "1.5-2 Cr", smoker: 107600, nonSmoker: 63620 },
+    { age: 43, coverRange: "1.5-2 Cr", smoker: 114525, nonSmoker: 67936 },
+    { age: 44, coverRange: "1.5-2 Cr", smoker: 121451, nonSmoker: 72252 },
+    { age: 45, coverRange: "1.5-2 Cr", smoker: 175512, nonSmoker: 103243 },
+    { age: 46, coverRange: "1.5-2 Cr", smoker: 204319, nonSmoker: 107865 },
+    { age: 47, coverRange: "1.5-2 Cr", smoker: 233127, nonSmoker: 112488 },
+    { age: 48, coverRange: "1.5-2 Cr", smoker: 261935, nonSmoker: 117111 },
+    { age: 49, coverRange: "1.5-2 Cr", smoker: 290743, nonSmoker: 121734 },
+    { age: 50, coverRange: "1.5-2 Cr", smoker: 253945, nonSmoker: 140897 },
+    { age: 51, coverRange: "1.5-2 Cr", smoker: 265942, nonSmoker: 148976 },
+    { age: 52, coverRange: "1.5-2 Cr", smoker: 277940, nonSmoker: 157055 },
+    { age: 53, coverRange: "1.5-2 Cr", smoker: 289937, nonSmoker: 165134 },
+    { age: 54, coverRange: "1.5-2 Cr", smoker: 301935, nonSmoker: 173213 },
+    { age: 55, coverRange: "1.5-2 Cr", smoker: 646019, nonSmoker: 380008 },
+
+    { age: 25, coverRange: "2-3 Cr", smoker: 52084, nonSmoker: 30616 },
+    { age: 26, coverRange: "2-3 Cr", smoker: 57941, nonSmoker: 34103 },
+    { age: 27, coverRange: "2-3 Cr", smoker: 63799, nonSmoker: 37590 },
+    { age: 28, coverRange: "2-3 Cr", smoker: 69656, nonSmoker: 41077 },
+    { age: 29, coverRange: "2-3 Cr", smoker: 75514, nonSmoker: 44564 },
+    { age: 30, coverRange: "2-3 Cr", smoker: 80192, nonSmoker: 45350 },
+    { age: 31, coverRange: "2-3 Cr", smoker: 83591, nonSmoker: 46975 },
+    { age: 32, coverRange: "2-3 Cr", smoker: 85500, nonSmoker: 47461 },
+    { age: 33, coverRange: "2-3 Cr", smoker: 88033, nonSmoker: 51946 },
+    { age: 34, coverRange: "2-3 Cr", smoker: 95567, nonSmoker: 56432 },
+    { age: 35, coverRange: "2-3 Cr", smoker: 85743, nonSmoker: 61468 },
+    { age: 36, coverRange: "2-3 Cr", smoker: 95932, nonSmoker: 63454 },
+    { age: 37, coverRange: "2-3 Cr", smoker: 106121, nonSmoker: 66010 },
+    { age: 38, coverRange: "2-3 Cr", smoker: 116310, nonSmoker: 68426 },
+    { age: 39, coverRange: "2-3 Cr", smoker: 126499, nonSmoker: 74412 },
+    { age: 40, coverRange: "2-3 Cr", smoker: 122865, nonSmoker: 79402 },
+    { age: 41, coverRange: "2-3 Cr", smoker: 136601, nonSmoker: 83500 },
+    { age: 42, coverRange: "2-3 Cr", smoker: 150337, nonSmoker: 86342 },
+    { age: 43, coverRange: "2-3 Cr", smoker: 164073, nonSmoker: 93387 },
+    { age: 44, coverRange: "2-3 Cr", smoker: 177810, nonSmoker: 100432 },
+    { age: 45, coverRange: "2-3 Cr", smoker: 213606, nonSmoker: 126561 },
+    { age: 46, coverRange: "2-3 Cr", smoker: 237710, nonSmoker: 140508 },
+    { age: 47, coverRange: "2-3 Cr", smoker: 261815, nonSmoker: 154456 },
+    { age: 48, coverRange: "2-3 Cr", smoker: 285920, nonSmoker: 168403 },
+    { age: 49, coverRange: "2-3 Cr", smoker: 310025, nonSmoker: 182351 },
+    { age: 50, coverRange: "2-3 Cr", smoker: 351934, nonSmoker: 197679 },
+    { age: 51, coverRange: "2-3 Cr", smoker: 359614, nonSmoker: 200294 },
+    { age: 52, coverRange: "2-3 Cr", smoker: 371294, nonSmoker: 223480 },
+    { age: 53, coverRange: "2-3 Cr", smoker: 405974, nonSmoker: 246665 },
+    { age: 54, coverRange: "2-3 Cr", smoker: 440654, nonSmoker: 269851 },
+    { age: 55, coverRange: "2-3 Cr", smoker: 805417, nonSmoker: 473091 }
+  ],
+  85: [
+    { age: 25, coverRange: "1-1.49 Cr", smoker: 34526, nonSmoker: 20945 },
+    { age: 26, coverRange: "1-1.49 Cr", smoker: 37986, nonSmoker: 22704 },
+    { age: 27, coverRange: "1-1.49 Cr", smoker: 41447, nonSmoker: 24464 },
+    { age: 28, coverRange: "1-1.49 Cr", smoker: 44908, nonSmoker: 26223 },
+    { age: 29, coverRange: "1-1.49 Cr", smoker: 48369, nonSmoker: 27983 },
+    { age: 30, coverRange: "1-1.49 Cr", smoker: 43283, nonSmoker: 29101 },
+    { age: 31, coverRange: "1-1.49 Cr", smoker: 51042, nonSmoker: 31034 },
+    { age: 32, coverRange: "1-1.49 Cr", smoker: 52200, nonSmoker: 32620 },
+    { age: 33, coverRange: "1-1.49 Cr", smoker: 56570, nonSmoker: 33150 },
+    { age: 34, coverRange: "1-1.49 Cr", smoker: 61000, nonSmoker: 35713 },
+    { age: 35, coverRange: "1-1.49 Cr", smoker: 63910, nonSmoker: 33710 },
+    { age: 36, coverRange: "1-1.49 Cr", smoker: 66506, nonSmoker: 36980 },
+    { age: 37, coverRange: "1-1.49 Cr", smoker: 68286, nonSmoker: 40250 },
+    { age: 38, coverRange: "1-1.49 Cr", smoker: 74065, nonSmoker: 43520 },
+    { age: 39, coverRange: "1-1.49 Cr", smoker: 79845, nonSmoker: 46790 },
+    { age: 40, coverRange: "1-1.49 Cr", smoker: 85902, nonSmoker: 46115 },
+    { age: 41, coverRange: "1-1.49 Cr", smoker: 86764, nonSmoker: 51019 },
+    { age: 42, coverRange: "1-1.49 Cr", smoker: 94874, nonSmoker: 55924 },
+    { age: 43, coverRange: "1-1.49 Cr", smoker: 102984, nonSmoker: 60829 },
+    { age: 44, coverRange: "1-1.49 Cr", smoker: 111094, nonSmoker: 65734 },
+    { age: 45, coverRange: "1-1.49 Cr", smoker: 146543, nonSmoker: 86453 },
+    { age: 46, coverRange: "1-1.49 Cr", smoker: 152040, nonSmoker: 93947 },
+    { age: 47, coverRange: "1-1.49 Cr", smoker: 162130, nonSmoker: 101442 },
+    { age: 48, coverRange: "1-1.49 Cr", smoker: 189100, nonSmoker: 108937 },
+    { age: 49, coverRange: "1-1.49 Cr", smoker: 192700, nonSmoker: 116432 },
+    { age: 50, coverRange: "1-1.49 Cr", smoker: 208567, nonSmoker: 122345 },
+    { age: 51, coverRange: "1-1.49 Cr", smoker: 226039, nonSmoker: 129012 },
+    { age: 52, coverRange: "1-1.49 Cr", smoker: 243511, nonSmoker: 139042 },
+    { age: 53, coverRange: "1-1.49 Cr", smoker: 260983, nonSmoker: 142969 },
+    { age: 54, coverRange: "1-1.49 Cr", smoker: 278456, nonSmoker: 165111 },
+    { age: 55, coverRange: "1-1.49 Cr", smoker: 604567, nonSmoker: 354677 },
+
+    { age: 25, coverRange: "1.5-2 Cr", smoker: 48369, nonSmoker: 28456 },
+    { age: 26, coverRange: "1.5-2 Cr", smoker: 51354, nonSmoker: 30199 },
+    { age: 27, coverRange: "1.5-2 Cr", smoker: 54340, nonSmoker: 31943 },
+    { age: 28, coverRange: "1.5-2 Cr", smoker: 57326, nonSmoker: 33687 },
+    { age: 29, coverRange: "1.5-2 Cr", smoker: 60312, nonSmoker: 35431 },
+    { age: 30, coverRange: "1.5-2 Cr", smoker: 64032, nonSmoker: 37361 },
+    { age: 31, coverRange: "1.5-2 Cr", smoker: 65136, nonSmoker: 38393 },
+    { age: 32, coverRange: "1.5-2 Cr", smoker: 69241, nonSmoker: 40726 },
+    { age: 33, coverRange: "1.5-2 Cr", smoker: 73346, nonSmoker: 43059 },
+    { age: 34, coverRange: "1.5-2 Cr", smoker: 77451, nonSmoker: 45392 },
+    { age: 35, coverRange: "1.5-2 Cr", smoker: 81657, nonSmoker: 47970 },
+    { age: 36, coverRange: "1.5-2 Cr", smoker: 86079, nonSmoker: 50988 },
+    { age: 37, coverRange: "1.5-2 Cr", smoker: 91501, nonSmoker: 54306 },
+    { age: 38, coverRange: "1.5-2 Cr", smoker: 96923, nonSmoker: 57624 },
+    { age: 39, coverRange: "1.5-2 Cr", smoker: 102345, nonSmoker: 60943 },
+    { age: 40, coverRange: "1.5-2 Cr", smoker: 112769, nonSmoker: 66366 },
+    { age: 41, coverRange: "1.5-2 Cr", smoker: 121765, nonSmoker: 71609 },
+    { age: 42, coverRange: "1.5-2 Cr", smoker: 130762, nonSmoker: 76853 },
+    { age: 43, coverRange: "1.5-2 Cr", smoker: 139759, nonSmoker: 82097 },
+    { age: 44, coverRange: "1.5-2 Cr", smoker: 148756, nonSmoker: 87341 },
+    { age: 45, coverRange: "1.5-2 Cr", smoker: 203520, nonSmoker: 119718 },
+    { age: 46, coverRange: "1.5-2 Cr", smoker: 214076, nonSmoker: 125651 },
+    { age: 47, coverRange: "1.5-2 Cr", smoker: 224632, nonSmoker: 131584 },
+    { age: 48, coverRange: "1.5-2 Cr", smoker: 235188, nonSmoker: 137517 },
+    { age: 49, coverRange: "1.5-2 Cr", smoker: 245745, nonSmoker: 143451 },
+    { age: 50, coverRange: "1.5-2 Cr", smoker: 285678, nonSmoker: 167592 },
+    { age: 51, coverRange: "1.5-2 Cr", smoker: 303616, nonSmoker: 178436 },
+    { age: 52, coverRange: "1.5-2 Cr", smoker: 321555, nonSmoker: 189281 },
+    { age: 53, coverRange: "1.5-2 Cr", smoker: 339493, nonSmoker: 200126 },
+    { age: 54, coverRange: "1.5-2 Cr", smoker: 357432, nonSmoker: 210971 },
+    { age: 55, coverRange: "1.5-2 Cr", smoker: 803245, nonSmoker: 472392 },
+
+    { age: 25, coverRange: "2-3 Cr", smoker: 61341, nonSmoker: 36197 },
+    { age: 26, coverRange: "2-3 Cr", smoker: 68586, nonSmoker: 40459 },
+    { age: 27, coverRange: "2-3 Cr", smoker: 75832, nonSmoker: 44722 },
+    { age: 28, coverRange: "2-3 Cr", smoker: 83078, nonSmoker: 48984 },
+    { age: 29, coverRange: "2-3 Cr", smoker: 87910, nonSmoker: 53247 },
+    { age: 30, coverRange: "2-3 Cr", smoker: 90450, nonSmoker: 46095 },
+    { age: 31, coverRange: "2-3 Cr", smoker: 94540, nonSmoker: 51548 },
+    { age: 32, coverRange: "2-3 Cr", smoker: 96909, nonSmoker: 57002 },
+    { age: 33, coverRange: "2-3 Cr", smoker: 106182, nonSmoker: 62456 },
+    { age: 34, coverRange: "2-3 Cr", smoker: 115456, nonSmoker: 67910 },
+    { age: 35, coverRange: "2-3 Cr", smoker: 124900, nonSmoker: 61742 },
+    { age: 36, coverRange: "2-3 Cr", smoker: 126012, nonSmoker: 68941 },
+    { age: 37, coverRange: "2-3 Cr", smoker: 128615, nonSmoker: 76141 },
+    { age: 38, coverRange: "2-3 Cr", smoker: 140930, nonSmoker: 83341 },
+    { age: 39, coverRange: "2-3 Cr", smoker: 153245, nonSmoker: 90541 },
+    { age: 40, coverRange: "2-3 Cr", smoker: 166902, nonSmoker: 88700 },
+    { age: 41, coverRange: "2-3 Cr", smoker: 167803, nonSmoker: 98634 },
+    { age: 42, coverRange: "2-3 Cr", smoker: 184716, nonSmoker: 108568 },
+    { age: 43, coverRange: "2-3 Cr", smoker: 201629, nonSmoker: 118502 },
+    { age: 44, coverRange: "2-3 Cr", smoker: 218542, nonSmoker: 128437 },
+    { age: 45, coverRange: "2-3 Cr", smoker: 249840, nonSmoker: 146758 },
+    { age: 46, coverRange: "2-3 Cr", smoker: 277984, nonSmoker: 163455 },
+    { age: 47, coverRange: "2-3 Cr", smoker: 306129, nonSmoker: 180152 },
+    { age: 48, coverRange: "2-3 Cr", smoker: 334274, nonSmoker: 196849 },
+    { age: 49, coverRange: "2-3 Cr", smoker: 362419, nonSmoker: 213546 },
+    { age: 50, coverRange: "2-3 Cr", smoker: 391543, nonSmoker: 212519 },
+    { age: 51, coverRange: "2-3 Cr", smoker: 359614, nonSmoker: 200294 },
+    { age: 52, coverRange: "2-3 Cr", smoker: 371294, nonSmoker: 223480 },
+    { age: 53, coverRange: "2-3 Cr", smoker: 405974, nonSmoker: 246665 },
+    { age: 54, coverRange: "2-3 Cr", smoker: 440654, nonSmoker: 269851 },
+    { age: 55, coverRange: "2-3 Cr", smoker: 1064357, nonSmoker: 598227 }
+  ]
+};
+
+
+  // Map below 1cr to "1-1.49 Cr", above 3cr to "2-3 Cr"
+  function getCoverRange(lifeCover) {
+    if (lifeCover < 1e7) return "1-1.49 Cr";
+    if (lifeCover >= 1e7 && lifeCover < 1.5e7) return "1-1.49 Cr";
+    if (lifeCover >= 1.5e7 && lifeCover < 2e7) return "1.5-2 Cr";
+    if (lifeCover >= 2e7 && lifeCover <= 3e7) return "2-3 Cr";
+    if (lifeCover > 3e7) return "2-3 Cr";
+    return null;
+  }
+
+  // UI tab logic
+  const tabs = document.querySelectorAll('.tab');
+  let selectedLifeCoverAge = 70;
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      selectedLifeCoverAge = parseInt(tab.getAttribute('data-age'));
+    });
+  });
+
+  document.getElementById('calculateBtn').addEventListener('click', () => {
+    const currentAge = parseInt(document.getElementById('currentAge').value);
+    const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
+    const smoker = document.getElementById('smoker').checked;
+
+    if (isNaN(currentAge) || currentAge < 25 || currentAge > 55) {
+      alert('Please enter a valid Current Age between 25 and 55.');
+      return;
+    }
+    if (isNaN(monthlyIncome) || monthlyIncome <= 0) {
+      alert('Please enter a valid Monthly Income.');
+      return;
     }
 
-    function calculate() {
-      const age = parseInt(document.getElementById('age').value);
-      const income = parseInt(document.getElementById('income').value);
-      const smoker = document.getElementById('smoker').value;
-      const coverAge = document.getElementById('coverAge').value;
+    // Calculate expected life cover
+    const lifeCover = monthlyIncome * 150;
+    const coverRange = getCoverRange(lifeCover);
 
-      const ageGroup = getAgeGroup(age);
-      if (!ageGroup) {
-        alert("Please enter a valid age between 25 and 55.");
-        return;
-      }
+    // Find premium from the table
+    const table = premiumTables[selectedLifeCoverAge];
+    const entry = table.find(row => row.age === currentAge && row.coverRange === coverRange);
 
-      const lifeCover = income * 150;
-      const coverBracket = lifeCover <= 20000000 ? "1.5" : "2.5";
-      const smokerStatus = smoker === "yes" ? "yes" : "no";
+    let premium = null;
+    if (entry) {
+      premium = smoker ? entry.smoker : entry.nonSmoker;
+    }
 
-      const data = dataByCoverAge[coverAge];
-      const premiumRange = data?.[ageGroup]?.[coverBracket]?.[smokerStatus];
+    const outputDiv = document.getElementById('output');
+    outputDiv.style.display = 'block';
 
-      if (!premiumRange) {
-        document.getElementById("output").innerHTML = "No data available for your input.";
-        return;
-      }
-
-      const output = `
-        <strong>Expected Life Cover:</strong> ₹${(lifeCover / 10000000).toFixed(2)} Crores<br>
-        <strong>Annual Premium (tentative):</strong> ₹${premiumRange[0].toLocaleString()} - ₹${premiumRange[1].toLocaleString()}<br>
-        <strong>Paying Term:</strong> ${60 - age} years (till age 60)<br><br>
-        <em>* Premiums are tentative and may vary based on your health and insurer underwriting.</em>
+    if (premium !== null) {
+      outputDiv.innerHTML = `
+        <p><strong>Expected Life Cover:</strong> ₹${lifeCover.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+        <p><strong>Paying Term:</strong> ${60 - currentAge} years (till age 60)</p>
+        <p><strong>Life Cover Term:</strong> up to age ${selectedLifeCoverAge}</p>
+        <p><strong>Yearly Premium (Tentative):</strong> ₹${premium.toLocaleString()}</p>
+        <p><em>Note: Premiums are tentative and will vary based on your health and insurer's policies.</em></p>
       `;
-
-      document.getElementById("output").innerHTML = output;
-      document.getElementById("output").style.display = "block";
+    } else {
+      outputDiv.innerHTML = `
+        <p><strong>Expected Life Cover:</strong> ₹${lifeCover.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+        <p style="color: red;"><strong>No premium data available for this combination of age and cover range.</strong></p>
+      `;
     }
-  </script>
+
+    document.getElementById('note').style.display = 'block';
+  });
+</script>
 </body>
 </html>
+
