@@ -5,41 +5,174 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Term Insurance Premium Calculator</title>
 <style>
-  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f8; margin: 0; padding: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; color: #333; }
-  .container { background: white; margin: 40px 20px; padding: 30px 40px; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); max-width: 480px; width: 100%; }
-  h1 { text-align: center; color: #0077cc; margin-bottom: 30px; }
-  label { display: block; margin-top: 15px; font-weight: 600; }
-  input[type="number"], select { width: 100%; padding: 10px 12px; margin-top: 6px; border: 1.8px solid #ccc; border-radius: 6px; font-size: 16px; transition: border-color 0.3s; }
-  input[type="number"]:focus, select:focus { border-color: #0077cc; outline: none; }
-  .tabs { margin-top: 20px; display: flex; justify-content: space-between; }
-  .tab { flex: 1; text-align: center; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; font-weight: 600; color: #555; transition: all 0.3s ease; user-select: none; }
-  .tab.active { border-color: #0077cc; color: #0077cc; }
-  .smoker-toggle { margin-top: 20px; display: flex; align-items: center; gap: 10px; }
-  .smoker-toggle input { width: auto; }
-  button { margin-top: 30px; width: 100%; background-color: #0077cc; color: white; font-size: 18px; padding: 12px 0; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; transition: background-color 0.3s; }
-  button:hover { background-color: #005fa3; }
-  .output { margin-top: 30px; background: #e7f0fc; padding: 20px; border-radius: 8px; color: #004a99; font-weight: 600; line-height: 1.5; }
-  .note { font-size: 14px; color: #666; margin-top: 15px; font-style: italic; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f7f8;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    color: #333;
+  }
+  .container {
+    background: white;
+    margin: 40px auto;
+    padding: 32px 32px 24px 32px;
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+    max-width: 480px;
+    width: 100%;
+  }
+  h1 {
+    text-align: center;
+    color: #0077cc;
+    margin-bottom: 8px;
+    font-size: 2rem;
+  }
+  .subtitle {
+    text-align: center;
+    color: #555;
+    margin-bottom: 24px;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+  .section-label {
+    font-weight: 600;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    color: #444;
+  }
+  .tab-group {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    background: #f0f4f8;
+    color: #555;
+    font-weight: 600;
+    border: 2px solid #e0e6ed;
+    border-bottom: none;
+    transition: background 0.2s, color 0.2s;
+  }
+  .tab.active {
+    background: #0077cc;
+    color: #fff;
+    border-color: #0077cc;
+    z-index: 2;
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .input-label {
+    min-width: 110px;
+    font-weight: 500;
+    color: #444;
+  }
+  .slider-group {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: #0077cc;
+    height: 4px;
+  }
+  input[type="number"] {
+    width: 90px;
+    padding: 7px 8px;
+    border: 1.5px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    text-align: right;
+    transition: border-color 0.2s;
+  }
+  input[type="number"]:focus {
+    border-color: #0077cc;
+    outline: none;
+  }
+  .output {
+    margin-top: 28px;
+    background: #e7f0fc;
+    padding: 18px;
+    border-radius: 8px;
+    color: #004a99;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .note {
+    font-size: 14px;
+    color: #666;
+    margin-top: 15px;
+    font-style: italic;
+    text-align: center;
+  }
+  button {
+    margin-top: 18px;
+    width: 100%;
+    background-color: #0077cc;
+    color: white;
+    font-size: 1.1rem;
+    padding: 12px 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background-color: #005fa3;
+  }
+  @media (max-width: 600px) {
+    .container { padding: 18px 6px; }
+    .input-label { min-width: 80px; }
+  }
 </style>
 </head>
 <body>
   <div class="container">
     <h1>Term Insurance Calculator</h1>
-    <label for="currentAge">Current Age</label>
-    <input type="number" id="currentAge" min="25" max="55" value="30" />
+    <div class="subtitle">Calculate your premium instantly</div>
 
-    <label for="monthlyIncome">Monthly Income (₹)</label>
-    <input type="number" id="monthlyIncome" min="0" value="50000" />
-
-    <div class="tabs">
-      <div class="tab active" data-age="70">Life Cover up to 70 years</div>
-      <div class="tab" data-age="80">Life Cover up to 80 years</div>
-      <div class="tab" data-age="85">Life Cover up to 85 years</div>
+    <div class="section-label">Current Age</div>
+    <div class="input-row">
+      <span class="input-label">Age</span>
+      <div class="slider-group">
+        <input type="range" id="ageSlider" min="25" max="55" value="30" />
+        <input type="number" id="ageInput" min="25" max="55" value="30" />
+      </div>
     </div>
 
-    <div class="smoker-toggle">
-      <label for="smoker">Smoker</label>
-      <input type="checkbox" id="smoker" />
+    <div class="section-label">Monthly Income (₹)</div>
+    <div class="input-row">
+      <span class="input-label">Income</span>
+      <div class="slider-group">
+        <input type="range" id="incomeSlider" min="10000" max="500000" step="1000" value="50000" />
+        <input type="number" id="incomeInput" min="10000" max="500000" step="1000" value="50000" />
+      </div>
+    </div>
+
+    <div class="section-label">Life Cover Upto</div>
+    <div class="tab-group" id="termTabs">
+     <div class="tab" data-age="70">70 Years</div>
+     <div class="tab" data-age="80">80 Years</div>
+     <div class="tab active" data-age="85">85 Years</div>
+    </div>
+
+    <div class="section-label">Profile</div>
+    <div class="tab-group" id="smokeTabs">
+      <div class="tab active" data-smoke="nonSmoker">Non-Smoker</div>
+      <div class="tab" data-smoke="smoker">Smoker</div>
     </div>
 
     <button id="calculateBtn">Calculate</button>
@@ -347,77 +480,100 @@
   ]
 };
 
+function getCoverRange(lifeCover) {
+  if (lifeCover < 1e7) return "1-1.49 Cr";
+  if (lifeCover >= 1e7 && lifeCover < 1.5e7) return "1-1.49 Cr";
+  if (lifeCover >= 1.5e7 && lifeCover < 2e7) return "1.5-2 Cr";
+  if (lifeCover >= 2e7 && lifeCover <= 3e7) return "2-3 Cr";
+  if (lifeCover > 3e7) return "2-3 Cr";
+  return null;
+}
 
-  // Map below 1cr to "1-1.49 Cr", above 3cr to "2-3 Cr"
-  function getCoverRange(lifeCover) {
-    if (lifeCover < 1e7) return "1-1.49 Cr";
-    if (lifeCover >= 1e7 && lifeCover < 1.5e7) return "1-1.49 Cr";
-    if (lifeCover >= 1.5e7 && lifeCover < 2e7) return "1.5-2 Cr";
-    if (lifeCover >= 2e7 && lifeCover <= 3e7) return "2-3 Cr";
-    if (lifeCover > 3e7) return "2-3 Cr";
-    return null;
+// --- UI/UX logic for tabs and sliders ---
+let selectedLifeCoverAge = 70;
+let selectedSmoke = "nonSmoker";
+
+// Term tabs
+document.querySelectorAll('#termTabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#termTabs .tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    selectedLifeCoverAge = parseInt(tab.getAttribute('data-age'));
+  });
+});
+
+// Smoker/Non-Smoker tabs
+document.querySelectorAll('#smokeTabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#smokeTabs .tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    selectedSmoke = tab.getAttribute('data-smoke');
+  });
+});
+
+// Age slider/input sync
+const ageSlider = document.getElementById('ageSlider');
+const ageInput = document.getElementById('ageInput');
+ageSlider.addEventListener('input', () => { ageInput.value = ageSlider.value; });
+ageInput.addEventListener('input', () => {
+  let v = Math.max(25, Math.min(55, parseInt(ageInput.value) || 25));
+  ageInput.value = v;
+  ageSlider.value = v;
+});
+
+// Income slider/input sync
+const incomeSlider = document.getElementById('incomeSlider');
+const incomeInput = document.getElementById('incomeInput');
+incomeSlider.addEventListener('input', () => { incomeInput.value = incomeSlider.value; });
+incomeInput.addEventListener('input', () => {
+  let v = Math.max(10000, Math.min(500000, parseInt(incomeInput.value) || 10000));
+  incomeInput.value = v;
+  incomeSlider.value = v;
+});
+
+// Calculate button
+document.getElementById('calculateBtn').addEventListener('click', () => {
+  const currentAge = parseInt(ageInput.value);
+  const monthlyIncome = parseFloat(incomeInput.value);
+
+  if (isNaN(currentAge) || currentAge < 25 || currentAge > 55) {
+    alert('Please enter a valid Current Age between 25 and 55.');
+    return;
+  }
+  if (isNaN(monthlyIncome) || monthlyIncome < 10000 || monthlyIncome > 500000) {
+    alert('Please enter a valid Monthly Income.');
+    return;
   }
 
-  // UI tab logic
-  const tabs = document.querySelectorAll('.tab');
-  let selectedLifeCoverAge = 70;
+  const lifeCover = monthlyIncome * 150;
+  const coverRange = getCoverRange(lifeCover);
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      selectedLifeCoverAge = parseInt(tab.getAttribute('data-age'));
-    });
-  });
+  const table = premiumTables[selectedLifeCoverAge];
+  const entry = table.find(row => row.age === currentAge && row.coverRange === coverRange);
 
-  document.getElementById('calculateBtn').addEventListener('click', () => {
-    const currentAge = parseInt(document.getElementById('currentAge').value);
-    const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
-    const smoker = document.getElementById('smoker').checked;
+  const outputDiv = document.getElementById('output');
+  outputDiv.style.display = 'block';
 
-    if (isNaN(currentAge) || currentAge < 25 || currentAge > 55) {
-      alert('Please enter a valid Current Age between 25 and 55.');
-      return;
-    }
-    if (isNaN(monthlyIncome) || monthlyIncome <= 0) {
-      alert('Please enter a valid Monthly Income.');
-      return;
-    }
+ if (entry) {
+  const premium = entry[selectedSmoke];
+  outputDiv.innerHTML = `
+    <p><strong>Ideal Life Cover:</strong> ₹${lifeCover.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+    <p><strong>Life Cover Term:</strong> up to age ${selectedLifeCoverAge}</p>
+    <p><strong>Paying Term:</strong> ${60 - currentAge} years (till age 60)</p>
+    <p><strong>Yearly Premium (${selectedSmoke === 'smoker' ? 'Smoker' : 'Non-Smoker'}):</strong> ₹${premium.toLocaleString()}</p>
+    <p><em>Note: Premiums are tentative and will vary based on your health and insurer's policies.</em></p>
+  `;
+} else {
+  outputDiv.innerHTML = `
+    <p><strong>Expected Life Cover:</strong> ₹${lifeCover.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+    <p style="color: red;"><strong>No premium data available for this combination of age and cover range.</strong></p>
+  `;
+}
 
-    // Calculate expected life cover
-    const lifeCover = monthlyIncome * 150;
-    const coverRange = getCoverRange(lifeCover);
-
-    // Find premium from the table
-    const table = premiumTables[selectedLifeCoverAge];
-    const entry = table.find(row => row.age === currentAge && row.coverRange === coverRange);
-
-    let premium = null;
-    if (entry) {
-      premium = smoker ? entry.smoker : entry.nonSmoker;
-    }
-
-    const outputDiv = document.getElementById('output');
-    outputDiv.style.display = 'block';
-
-    if (premium !== null) {
-      outputDiv.innerHTML = `
-        <p><strong>Expected Life Cover:</strong> ₹${lifeCover.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
-        <p><strong>Paying Term:</strong> ${60 - currentAge} years (till age 60)</p>
-        <p><strong>Life Cover Term:</strong> up to age ${selectedLifeCoverAge}</p>
-        <p><strong>Yearly Premium (Tentative):</strong> ₹${premium.toLocaleString()}</p>
-        <p><em>Note: Premiums are tentative and will vary based on your health and insurer's policies.</em></p>
-      `;
-    } else {
-      outputDiv.innerHTML = `
-        <p><strong>Expected Life Cover:</strong> ₹${lifeCover.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
-        <p style="color: red;"><strong>No premium data available for this combination of age and cover range.</strong></p>
-      `;
-    }
-
-    document.getElementById('note').style.display = 'block';
+document.getElementById('note').style.display = 'block';
   });
 </script>
 </body>
 </html>
+
 
